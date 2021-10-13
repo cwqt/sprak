@@ -1,0 +1,22 @@
+datasource db {
+    // could be postgresql or mysql
+    provider = "sqlite"
+    url      = "file:dev.db"
+}
+
+generator db {
+    provider = "go run github.com/prisma/prisma-client-go"
+    // set the output folder and package name
+    // output           = "./your-folder"
+    // package          = "yourpackagename"
+}
+
+model Card {
+    id             Int      @id @unique
+    createdAt      DateTime @default(now())
+    lastReviewedAt DateTime
+    mapping        String // no:en -- target:source
+    target         String // hei hvordan går det?
+    source         String // hey how's it going?
+    tags           String // comma separated value tag1,tag2
+}

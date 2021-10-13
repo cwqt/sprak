@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
+	"sprak/db"
+
 	tea "github.com/charmbracelet/bubbletea"
 	lipgloss "github.com/charmbracelet/lipgloss"
+	anki "github.com/flimzy/anki"
 
 	ViewPage "sprak/view-page"
 )
@@ -129,9 +133,58 @@ func (m model) View() string {
 }
 
 func main() {
-	p := tea.NewProgram(initialModel())
-	if err := p.Start(); err != nil {
-		fmt.Printf("Alas, there's been an error: %v", err)
+	client := db.NewClient()
+	if err := client.Prisma.Connect(); err != nil {
+		fmt.Errorf(err.Error())
+	}
+
+	defer func() {
+		if err := client.Prisma.Disconnect(); err != nil {
+			panic(err)
+		}
+	}()
+
+	ctx := context.Background()
+
+	createCard := func(note *anki.Note) (*db.CardModel, error) {
+		card, err := client.Card.CreateOne(
+			db.Card.ID.Set(int(note.ID)),
+			db.Card.Mapping.Set("no:en"),
+			db.Card.Target.Set(note.FieldValues[0]),
+			db.Card.Source.Set(note.FieldValues[1]),
+			db.Card.Tags.Set(""),
+		).Exec(ctx)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return card, nil
+	}
+
+	apkg, err := anki.ReadFile("Bokmål.apkg")
+	if err != nil {
+		fmt.Println("Failed to load .apkg file")
 		os.Exit(1)
 	}
+
+	notes, _ := apkg.Notes()
+
+	for notes.Next() {
+		note, _ := notes.Note()
+		if err != nil {
+			fmt.Println("Failed on note")
+		}
+
+		createdNote, _ := createCard(note)
+		fmt.Printf("createdNote: %v\n", createdNote)
+	}
+
+	apkg.Close()
+
+	// p := tea.NewProgram(initialModel())
+	// if err := p.Start(); err != nil {
+	// 	fmt.Printf("Alas, there's been an error: %v", err)
+	// 	os.Exit(1)
+	// }
 }
