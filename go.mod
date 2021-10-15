@@ -3,6 +3,7 @@ module sprak
 go 1.16
 
 require (
+	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
 	github.com/charmbracelet/bubbletea v0.17.0
 	github.com/charmbracelet/lipgloss v0.4.0
 	github.com/flimzy/anki v0.0.0-20191116175829-03460c56b85c

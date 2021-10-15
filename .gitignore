@@ -1,3 +1,4 @@
 db
+dev.db
 migrations
 *.apkg

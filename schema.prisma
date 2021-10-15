@@ -12,11 +12,10 @@ generator db {
 }
 
 model Card {
-    id             Int      @id @unique
-    createdAt      DateTime @default(now())
-    lastReviewedAt DateTime
-    mapping        String // no:en -- target:source
-    target         String // hei hvordan går det?
-    source         String // hey how's it going?
-    tags           String // comma separated value tag1,tag2
+    id        Int      @id @unique
+    createdAt DateTime @default(now())
+    mapping   String // no:en -- target:source
+    target    String // hei hvordan går det?
+    source    String // hey how's it going?
+    tags      String // comma separated value tag1,tag2
 }
