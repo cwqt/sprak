@@ -3,59 +3,40 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
+	Bus "sprak/bus"
 	UI "sprak/ui"
 
 	tea "github.com/charmbracelet/bubbletea"
 	// tea "github.com/charmbracelet/bubbletea"
 )
 
-type X struct {
-	T string
-}
-
 func main() {
+
+	done := make(chan struct{})
+
 	p := tea.NewProgram(UI.InitialModel())
 
-	// Bus.Subscribe("test", func(event Bus.Event) {
-	// 	fmt.Println("%s %+v\n", event.Topic, event.Data)
-	// 	fmt.Print(p)
-	// 	p.Send(&event)
-	// })
+	Bus.Subscribe("test", func() {
+		p.Send("pushed!")
+	})
 
-	// Bus.Publish("test", X{T: "hello"})
+	go func() {
+		if err := p.Start(); err != nil {
+			fmt.Println("Error running program:", err)
+			os.Exit(1)
+		}
+		close(done)
+	}()
 
-	// Bus.Subscribe("view:change", func(event *Bus.Event) {
-	// 	p.Send(event)
-	// })
+	// Simulate activity
+	go func() {
+		for {
+			time.Sleep(1e9)
+			Bus.Publish("test", 1)
+		}
+	}()
 
-	// Bus.Publish("view:change", UI.ViewChange{To: Views.Menu})
-
-	// p.Send("hello")
-
-	// Bus.Subscribe("view:change", func(value UI.ViewChange) {
-	// })
-
-	if err := p.Start(); err != nil {
-		fmt.Println("Uh oh", err)
-		os.Exit(1)
-	}
-
-	p.Send(&X{T: "sting"})
-	p.Send(&X{T: "sting"})
-	p.Send(&X{T: "sting"})
-	p.Send(&X{T: "sting"})
-
-	// Bus.Publish("test", X{T: "hello"})
-
-	// p.Send(tea.Quit())
-	//
-	// if err := Data.Connect(); err != nil {
-	// 	os.Exit(1)
-	// }
-
-	// if _, err := Anki.ImportApkg("Bokmål.apkg"); err != nil {
-	// 	os.Exit(1)
-	// }
-
+	<-done
 }

@@ -3,7 +3,6 @@ package Anki
 import (
 	"fmt"
 
-	Bus "sprak/bus"
 	Data "sprak/data"
 
 	"github.com/flimzy/anki"
@@ -25,7 +24,7 @@ func ImportApkg(path string) (*anki.Apkg, error) {
 		return nil, err
 	}
 
-	Bus.Publish("cards:total", totalCardsCount)
+	// Bus.Publish("cards:total", totalCardsCount)
 
 	notes, _ := apkg.Notes()
 
@@ -38,12 +37,12 @@ func ImportApkg(path string) (*anki.Apkg, error) {
 			fmt.Println("Failed to get note", fmt.Errorf(err.Error()))
 		}
 
-		card, err := Data.UpsertCard(note)
+		_, err = Data.UpsertCard(note)
 		if err != nil {
 			return nil, err
 		}
 
-		Bus.Publish("card:upserted", card.ID)
+		// Bus.Publish("card:upserted", card.ID)
 	}
 
 	apkg.Close()
