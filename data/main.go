@@ -11,17 +11,17 @@ import (
 var Client = db.NewClient()
 var ctx = context.Background()
 
-func Connect() *db.PrismaClient {
+func Connect() error {
 	fmt.Print("Connecting to SQLite via Prisma... ")
 
 	if err := Client.Prisma.Connect(); err != nil {
 		fmt.Print("FAILURE\n")
 		fmt.Errorf(err.Error())
+		return err
 	}
 
 	fmt.Print("SUCCESS\n")
-
-	return Client
+	return nil
 }
 
 func Disconnect() {
@@ -32,7 +32,7 @@ func Disconnect() {
 }
 
 func UpsertCard(note *anki.Note) (*db.CardModel, error) {
-	card, err := Client.Card.UpsertOne(
+	if card, err := Client.Card.UpsertOne(
 		db.Card.ID.Equals(int(note.ID)),
 	).Create(
 		db.Card.ID.Set(int(note.ID)),
@@ -44,11 +44,9 @@ func UpsertCard(note *anki.Note) (*db.CardModel, error) {
 		db.Card.Target.Set(note.FieldValues[0]),
 		db.Card.Source.Set(note.FieldValues[1]),
 		db.Card.Tags.Set(note.Tags),
-	).Exec(ctx)
-
-	if err != nil {
+	).Exec(ctx); err != nil {
 		return nil, err
+	} else {
+		return card, nil
 	}
-
-	return card, nil
 }
