@@ -55,7 +55,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Views.SwitchTo(view.view)
 			}
 		}
-
 	}
 
 	return m, nil

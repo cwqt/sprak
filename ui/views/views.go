@@ -1,6 +1,6 @@
 package Views
 
-// Bus "sprak/bus"
+import Bus "sprak/bus"
 
 type View string
 
@@ -10,5 +10,5 @@ const (
 )
 
 func SwitchTo(view View) {
-	// Bus.Publish("view:change", view)
+	Bus.Publish("view:change", view)
 }

@@ -10,7 +10,9 @@ type Event struct {
 }
 
 func Publish(topic string, data interface{}) {
-	bus.Publish(topic, 1)
+	bus.Publish(topic, Event{Topic: topic, Data: data})
 }
 
-var Subscribe = bus.Subscribe
+func Subscribe(topic string, fn interface{}) {
+	bus.Subscribe(topic, fn)
+}

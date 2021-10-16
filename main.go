@@ -3,23 +3,24 @@ package main
 import (
 	"fmt"
 	"os"
+	Bus "sprak/bus"
+	Events "sprak/bus/events"
+	UI "sprak/ui"
+	Views "sprak/ui/views"
 	"time"
 
-	Bus "sprak/bus"
-	UI "sprak/ui"
-
 	tea "github.com/charmbracelet/bubbletea"
-	// tea "github.com/charmbracelet/bubbletea"
 )
 
-func main() {
+type X struct{ T int }
 
+func main() {
 	done := make(chan struct{})
 
 	p := tea.NewProgram(UI.InitialModel())
 
-	Bus.Subscribe("test", func() {
-		p.Send("pushed!")
+	Bus.Subscribe("view:change", func(event Bus.Event) {
+		p.Send(event)
 	})
 
 	go func() {
@@ -34,7 +35,7 @@ func main() {
 	go func() {
 		for {
 			time.Sleep(1e9)
-			Bus.Publish("test", 1)
+			Bus.Publish("view:change", Events.ChangeView{To: Views.Home})
 		}
 	}()
 
