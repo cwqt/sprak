@@ -13,8 +13,10 @@ require (
 	github.com/ispringteam/eventbus v0.0.0-20190701203509-53c525703608 // indirect
 	github.com/jmoiron/sqlx v1.3.4 // indirect
 	github.com/joho/godotenv v1.3.0
+	github.com/leandro-lugaresi/hub v1.1.1 // indirect
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
 	github.com/prisma/prisma-client-go v0.11.0
 	github.com/shopspring/decimal v1.2.0
+	github.com/simonfxr/pubsub v0.0.5 // indirect
 	github.com/takuoki/gocase v1.0.0
 )

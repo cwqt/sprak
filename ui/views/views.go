@@ -1,7 +1,5 @@
 package Views
 
-import Bus "sprak/bus"
-
 type View string
 
 const (
@@ -10,5 +8,5 @@ const (
 )
 
 func SwitchTo(view View) {
-	Bus.Publish("view:change", view)
+	// Bus.Publish("view:change", view)
 }

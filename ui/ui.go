@@ -24,7 +24,7 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// fmt.Println("updating...")
+	fmt.Println("\nupdating model...\n")
 
 	switch msg := msg.(type) {
 
@@ -40,6 +40,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "1":
+			Bus.Publish("view:change", Events.ChangeView{To: Views.Menu})
 		case "ctrl+c", "q":
 			fmt.Println("Goodbye!")
 			return m, tea.Quit

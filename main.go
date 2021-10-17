@@ -20,6 +20,7 @@ func main() {
 	p := tea.NewProgram(UI.InitialModel())
 
 	Bus.Subscribe("view:change", func(event Bus.Event) {
+		fmt.Printf("sending event to tea %+v\n", event)
 		p.Send(event)
 	})
 
