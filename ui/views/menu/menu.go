@@ -2,6 +2,7 @@ package Menu
 
 import (
 	"fmt"
+	Component "sprak/ui/component"
 	Views "sprak/ui/views"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -19,59 +20,62 @@ type menuItem struct {
 	view  Views.View
 }
 
-type model struct {
+type Model struct {
 	cursor int
-	items  map[int]menuItem
+	items  [2]menuItem
 }
 
-func initialModel(items map[int]menuItem) model {
-	return model{
-		cursor: 0,
-		items:  items,
-	}
-}
+func Create() Component.Component {
+	m := func() Model {
+		items := [2]menuItem{{
+			label: "Menu",
+			view:  Views.Menu,
+		}, {
+			label: "Lesson",
+			view:  Views.Lesson,
+		}}
 
-func (m model) Init() tea.Cmd {
-	return nil
-}
+		return Model{cursor: 0, items: items}
+	}()
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "up":
-			if m.cursor > 0 {
-				m.cursor--
+	return Component.Component{
+		Name: "MenuComponent",
+		Init: func() tea.Cmd {
+			return nil
+		},
+		Update: func(msg tea.Msg) tea.Cmd {
+			switch msg := msg.(type) {
+			case tea.KeyMsg:
+				switch msg.String() {
+				case "up":
+					if m.cursor > 0 {
+						m.cursor--
+					}
+				case "down":
+					if m.cursor < len(m.items)-1 {
+						m.cursor++
+					}
+				case "enter":
+					view := m.items[m.cursor]
+					Views.SwitchTo(view.view)
+				}
 			}
 
-		case "down":
-			if m.cursor < len(m.items)-1 {
-				m.cursor++
+			return nil
+		},
+		View: func() string {
+			s := titleText
+
+			for i, item := range m.items {
+				cursor := " "
+				if i == m.cursor {
+					cursor = ">"
+				}
+
+				s += fmt.Sprintf("%s %s\n", cursor, item.label)
 			}
 
-		case "enter":
-			view, ok := m.items[m.cursor]
-			if ok {
-				Views.SwitchTo(view.view)
-			}
-		}
+			return s
+		},
 	}
-
-	return m, nil
-}
-
-func (m model) View() string {
-	s := titleText
-
-	for i, item := range m.items {
-		cursor := " "
-
-		if i == m.cursor {
-			cursor = ">"
-		}
-
-		s += fmt.Sprintf("%s %s\n", cursor, item.label)
-	}
-
-	return s
 }

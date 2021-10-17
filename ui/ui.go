@@ -3,19 +3,23 @@ package UI
 import (
 	"fmt"
 	Bus "sprak/bus"
-	Events "sprak/bus/events"
+	Component "sprak/ui/component"
 	Views "sprak/ui/views"
+	Menu "sprak/ui/views/menu"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type model struct {
-	currentView Views.View
+	view Views.View
+
+	menu Component.Component
 }
 
-func InitialModel() model {
+func Create() model {
 	return model{
-		currentView: Views.Menu,
+		view: Views.Menu,
+		menu: Menu.Create(),
 	}
 }
 
@@ -24,40 +28,53 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	fmt.Println("\nupdating model...\n")
-
 	switch msg := msg.(type) {
 
 	case Bus.Event:
 		switch msg.Topic {
 		case "view:change":
-
-			if viewChange, ok := msg.Data.(Events.ChangeView); ok {
-				// fmt.Println("changing view to", viewChange.To)
-				m.currentView = viewChange.To
+			if event, ok := msg.Data.(Views.ChangeViewEvent); ok {
+				m.view = event.To
 			}
 		}
 
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "1":
-			Bus.Publish("view:change", Events.ChangeView{To: Views.Menu})
+			Views.SwitchTo(Views.Menu)
 		case "ctrl+c", "q":
 			fmt.Println("Goodbye!")
 			return m, tea.Quit
 		}
 	}
 
+	m.menu.Update(msg)
+
+	// m.children.Update(msg)
+
+	// for _, child := range m.children {
+	// 	if child.Name == m.currentView {
+	// 		child.Update(msg)
+	// 	}
+	// }
+
 	return m, nil
 }
 
 func (m model) View() string {
-	s := "\nPress q to quit.\n"
+	s := ""
 
-	if m.currentView == Views.Home {
-		s += "currently home!"
-	} else {
-		s += "currently away!"
-	}
+	s += m.menu.View()
+
+	// s += m.children.View()
+
+	// for _, child := range m.children {
+	// 	if child.Name == m.currentView {
+	// 		s += child.View()
+	// 	}
+	// }
+
+	s += "\nPress q to quit.\n"
+
 	return s
 }
