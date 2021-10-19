@@ -50,3 +50,11 @@ func UpsertCard(note *anki.Note) (*db.CardModel, error) {
 		return card, nil
 	}
 }
+
+func GetCards(amount int) ([]db.CardModel, error) {
+	if cards, err := Client.Card.FindMany().Take(amount).Exec(ctx); err != nil {
+		return nil, err
+	} else {
+		return cards, nil
+	}
+}

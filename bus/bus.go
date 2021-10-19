@@ -24,8 +24,12 @@ func Publish(topic string, data interface{}) {
 		event := Event{Topic: topic, Data: data}
 		bus.Publish(topic, event)
 
+		if topic != "log" {
+			bus.Publish("log", event)
+		}
+
 		// fmt.Printf("%+v\n", program)
-		if program != nil {
+		if program != nil && topic != "log" {
 			program.Send(event)
 		}
 	}()
