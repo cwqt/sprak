@@ -9,10 +9,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+var Router = UI.CreateRouter(Routes)
+
 func main() {
+	fmt.Println("Starting språk..")
 	done := make(chan struct{})
 
-	p := tea.NewProgram(UI.Create(), tea.WithAltScreen())
+	p := tea.NewProgram(UI.Create(Router), tea.WithAltScreen())
 	Bus.AttachToProgram(p)
 
 	go func() {

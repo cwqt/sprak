@@ -35,6 +35,10 @@ func Publish(topic string, data interface{}) {
 	}()
 }
 
+func Log(message string) {
+	Publish("log", message)
+}
+
 func Subscribe(topic string, cb func(event Event)) func() {
 	sub := bus.SubscribeAsync(topic, cb)
 

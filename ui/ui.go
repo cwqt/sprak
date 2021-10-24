@@ -3,61 +3,31 @@ package UI
 import (
 	"fmt"
 	Bus "sprak/bus"
-	Component "sprak/ui/component"
-	Views "sprak/ui/views"
-	Lesson "sprak/ui/views/lesson"
-	Logs "sprak/ui/views/log"
-	Menu "sprak/ui/views/menu"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-
-	"syscall"
-	"unsafe"
 )
 
-type winsize struct {
-	Row    uint16
-	Col    uint16
-	Xpixel uint16
-	Ypixel uint16
-}
-
-func getWidth() uint {
-	ws := &winsize{}
-	retCode, _, errno := syscall.Syscall(syscall.SYS_IOCTL,
-		uintptr(syscall.Stdin),
-		uintptr(syscall.TIOCGWINSZ),
-		uintptr(unsafe.Pointer(ws)))
-
-	if int(retCode) == -1 {
-		panic(errno)
-	}
-	return uint(ws.Col)
-}
-
-var PROGRAM_WIDTH = getWidth() - 2
-var PROGRAM_HEIGHT = 32
-
 type model struct {
-	view Views.View
-
-	menu   *Component.Component
-	lesson *Component.Component
-	logs   *Component.Component
+	router Router
+	outlet Component
+	logs   Component
 }
 
-func Create() model {
-	menu := Menu.Create()
-	logs := Logs.Create()
-
+func Create(router Router) model {
 	Bus.Publish("log", "Program loaded!")
+	Bus.Subscribe("router.navigate", func(event Bus.Event) {
+		if paths, ok := event.Data.([]string); ok {
+			router.Navigate(paths...)
+		}
+	})
+
+	// Set the router up to be in Menu straight away
+	router.Navigate("")
 
 	return model{
-		view:   Views.Menu,
-		menu:   &menu,
-		lesson: nil,
-		logs:   &logs,
+		router: router,
+		outlet: router.Outlet.Create(),
 	}
 }
 
@@ -66,20 +36,11 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
 
-	case Bus.Event:
-		switch msg.Topic {
-		case "view:change":
-			if event, ok := msg.Data.(Views.ChangeViewEvent); ok {
-				m.view = event.To
-			}
-		}
+	switch msg := msg.(type) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "1":
-			Views.SwitchTo(Views.Menu)
 		case "ctrl+c", "q":
 			fmt.Println("Goodbye!")
 			return m, tea.Quit
@@ -87,50 +48,31 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	m.logs.Update(msg)
-
-	switch m.view {
-	case Views.Menu:
-		if m.menu == nil {
-			menu := Menu.Create()
-			m.menu = &menu
-		}
-		m.menu.Update(msg)
-	case Views.Lesson:
-		if m.lesson == nil {
-			lesson := Lesson.Create()
-			m.lesson = &lesson
-		}
-		m.lesson.Update(msg)
-	}
+	m.outlet.Update(msg)
 
 	return m, nil
 }
 
 func (m model) View() string {
 	var style = lipgloss.NewStyle().
-		Width(int(PROGRAM_WIDTH)).
+		Width(PROGRAM_WIDTH).
 		BorderStyle(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("8")).
 		Align(lipgloss.Center)
 
 	s := ""
 
-	// s += m.menu.View()
-
-	switch m.view {
-	case Views.Menu:
-		s += m.menu.View()
-	case Views.Lesson:
-		s += m.lesson.View()
+	path := *m.router.GetPath()
+	for index, segment := range path {
+		s += segment
+		if index != len(path)-1 {
+			s += " / "
+		} else {
+			s += "\n"
+		}
 	}
 
-	// s += m.children.View()
-
-	// for _, child := range m.children {
-	// 	if child.Name == m.currentView {
-	// 		s += child.View()
-	// 	}
-	// }
+	s += m.outlet.View()
 
 	s += "\nPress q to quit.\n"
 

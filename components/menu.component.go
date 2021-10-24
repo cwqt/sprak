@@ -1,10 +1,9 @@
-package Menu
+package Component
 
 import (
 	"fmt"
 	Bus "sprak/bus"
-	Component "sprak/ui/component"
-	Views "sprak/ui/views"
+	UI "sprak/ui"
 	"strconv"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -21,36 +20,32 @@ ___/ .__/ _| \__,_| _\_\
 
 type menuItem struct {
 	label  string
-	view   Views.View
 	action func()
 }
 
-type Model struct {
+type menuModel struct {
 	cursor int
 	items  [2]menuItem
 }
 
-func Create() Component.Component {
-	m := func() Model {
+func Menu() UI.Component {
+	m := func() menuModel {
 		items := [2]menuItem{{
 			label: "Lesson",
-			view:  Views.Lesson,
 			action: func() {
-				Views.SwitchTo(Views.Lesson)
+				Bus.Publish("router.navigate", []string{"lesson"})
 			},
 		}, {
-			label: "Refresh deck",
-			view:  Views.Menu,
+			label: "Import deck",
 			action: func() {
-				Views.SwitchTo(Views.Menu)
+				Bus.Publish("router.navigate", []string{"import"})
 			},
 		}}
 
-		return Model{cursor: 0, items: items}
+		return menuModel{cursor: 0, items: items}
 	}()
 
-	return Component.Component{
-		Name: "MenuComponent",
+	return UI.Component{
 		Init: func() tea.Cmd {
 			return nil
 		},

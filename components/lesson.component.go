@@ -1,13 +1,12 @@
-package Lesson
+package Component
 
 import (
+	"fmt"
 	Bus "sprak/bus"
 	Data "sprak/data"
 	"sprak/db"
+	UI "sprak/ui"
 	"strconv"
-
-	Component "sprak/ui/component"
-	Exercise "sprak/ui/views/lesson/exercises"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -21,13 +20,13 @@ const (
 	Success
 )
 
-type Model struct {
-	state    State
-	cards    []db.CardModel
-	exercise Exercise.Current
+type lessonModel struct {
+	state State
+	cards []db.CardModel
+	// exercise Exercise
 }
 
-func Create() Component.Component {
+func Lesson() UI.Component {
 	Bus.Publish("log", "Creating Lesson component")
 
 	// Get first 20 cards
@@ -37,12 +36,14 @@ func Create() Component.Component {
 		cards = make([]db.CardModel, 0)
 	}
 
-	m := Model{
+	m := lessonModel{
 		state: Idle,
 		cards: cards,
 	}
 
-	return Component.Component{
+	Bus.Publish("log", fmt.Sprintf("%+v\n", m))
+
+	return UI.Component{
 		Init: func() tea.Cmd {
 			return nil
 		},
