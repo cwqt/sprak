@@ -28,24 +28,25 @@ type menuModel struct {
 	items  [2]menuItem
 }
 
-func Menu() UI.Component {
+func Menu(props *UI.Props) *UI.Component {
 	m := func() menuModel {
 		items := [2]menuItem{{
 			label: "Lesson",
 			action: func() {
-				Bus.Publish("router.navigate", []string{"lesson"})
+				Bus.Publish("router.navigate", []string{"index", "lesson"})
 			},
 		}, {
 			label: "Import deck",
 			action: func() {
-				Bus.Publish("router.navigate", []string{"import"})
+				Bus.Publish("router.navigate", []string{"index", "import"})
 			},
 		}}
 
 		return menuModel{cursor: 0, items: items}
 	}()
 
-	return UI.Component{
+	return &UI.Component{
+		Model: m,
 		Init: func() tea.Cmd {
 			return nil
 		},
@@ -68,28 +69,22 @@ func Menu() UI.Component {
 					m.items[m.cursor].action()
 				}
 			}
-
 			return nil
 		},
 		View: func() string {
-			var style = lipgloss.NewStyle().
-				Width(60).
-				Align(lipgloss.Center)
-
-			s := style.Render(titleText)
-
+			s := lipgloss.NewStyle().Width(60).Align(lipgloss.Center).Render(titleText)
 			s += "\nspråk, duolingo on the cli\n\n"
-
 			for i, item := range m.items {
 				cursor := " "
 				if i == m.cursor {
 					cursor = ">"
 				}
-
 				s += fmt.Sprintf("%s %s\n", cursor, item.label)
 			}
-
 			return s
+		},
+		Destroy: func() {
+			Bus.Log("destroyed menu!")
 		},
 	}
 }

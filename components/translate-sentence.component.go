@@ -6,8 +6,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func TranslateSentenceComponent() UI.Component {
-	return UI.Component{
+func TranslateSentenceComponent(props *UI.Props) *UI.Component {
+	return &UI.Component{
 		Init: func() tea.Cmd {
 			return nil
 		},
@@ -15,10 +15,9 @@ func TranslateSentenceComponent() UI.Component {
 			return nil
 		},
 		View: func() string {
-			return ""
+			return "translate the sentence"
 		},
 		Destroy: func() {
-
 		},
 	}
 }

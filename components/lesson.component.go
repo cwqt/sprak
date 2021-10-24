@@ -1,7 +1,6 @@
 package Component
 
 import (
-	"fmt"
 	Bus "sprak/bus"
 	Data "sprak/data"
 	"sprak/db"
@@ -26,7 +25,7 @@ type lessonModel struct {
 	// exercise Exercise
 }
 
-func Lesson() UI.Component {
+func Lesson(props *UI.Props) *UI.Component {
 	Bus.Publish("log", "Creating Lesson component")
 
 	// Get first 20 cards
@@ -41,17 +40,28 @@ func Lesson() UI.Component {
 		cards: cards,
 	}
 
-	Bus.Publish("log", fmt.Sprintf("%+v\n", m))
-
-	return UI.Component{
+	return &UI.Component{
 		Init: func() tea.Cmd {
 			return nil
 		},
 		Update: func(msg tea.Msg) tea.Cmd {
-			return nil
+			switch msg := msg.(type) {
+			case tea.KeyMsg:
+				switch msg.String() {
+				case "1":
+					Bus.Publish("router.navigate", []string{"index", "lesson", "listening"})
+				}
+			}
+
+			return props.Outlet.Update(msg)
 		},
 		View: func() string {
-			return "lesson! in state " + strconv.Itoa(int(m.state))
+			s := props.Outlet.View()
+			s += "lesson! in state " + strconv.Itoa(int(m.state))
+
+			return s
+		},
+		Destroy: func() {
 		},
 	}
 }

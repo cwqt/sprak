@@ -23,7 +23,7 @@ type importModel struct {
 type importError struct{}
 type importSuccess struct{}
 
-func Import() UI.Component {
+func Import(props *UI.Props) *UI.Component {
 	Bus.Publish("log", "Creating Refresh Deck component")
 
 	// Create the spinner to be shown
@@ -39,7 +39,7 @@ func Import() UI.Component {
 
 	Bus.Log(fmt.Sprintf("%+v\n", m))
 
-	return UI.Component{
+	return &UI.Component{
 		Init: func() tea.Cmd {
 			return func() tea.Msg {
 				Bus.Log("starting import...")

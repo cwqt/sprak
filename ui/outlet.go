@@ -8,44 +8,63 @@ import (
 )
 
 type outletModel struct {
-	Routes map[string]Component // active routed component tree
+	active map[string]*Component
+	path   []string
 }
 
-func CreateOutlet(router routerModel) Component {
+type Outlet struct {
+	Create func() *Component
+}
+
+func CreateOutlet(routing RoutingTable, paths ...string) *Component {
 	m := outletModel{
-		Routes: make(map[string]Component),
+		active: map[string]*Component{},
 	}
 
-	return Component{
+	return &Component{
+		Model: &m,
 		Init: func() tea.Cmd {
 			Bus.Log(fmt.Sprintf("%+v", m))
 			return nil
 		},
 		Update: func(msg tea.Msg) tea.Cmd {
-			path := router.Path
+			cmds := make([]tea.Cmd, 0)
 
-			Bus.Log(fmt.Sprint(path))
+			if len(paths) > 0 {
+				head := paths[0]
 
-			if len(path) > 0 {
-				head := path[0]
-
-				if route, ok := m.Routes[head]; ok {
-					route.Update(msg)
+				if route, ok := m.active[head]; ok {
+					if cmd := route.Update(msg); cmd != nil {
+						cmds = append(cmds, cmd)
+					}
 				} else {
-					if component, ok := router.Routes[head]; ok {
-						m.Routes[head] = component.Create()
-						m.Routes[head].Init()
+					for path, route := range m.active {
+						if path != head {
+							Bus.Log(fmt.Sprintf("destroying: %s", path))
+							route.Destroy()
+							delete(m.active, path)
+						}
+					}
+
+					if route, ok := routing[head]; ok {
+						m.active[head] = route.Create(&Props{
+							Outlet: CreateOutlet(route.Children, paths[1:]...),
+						})
+
+						if cmd := m.active[head].Init(); cmd != nil {
+							cmds = append(cmds, cmd)
+						}
 					}
 				}
 			}
 
-			return nil
+			return tea.Batch(cmds...)
 		},
 		View: func() string {
 			s := ""
 
-			for _, path := range router.Path {
-				if component, ok := m.Routes[path]; ok {
+			for _, path := range paths {
+				if component, ok := m.active[path]; ok {
 					s += component.View()
 				}
 			}
@@ -53,7 +72,7 @@ func CreateOutlet(router routerModel) Component {
 			return s
 		},
 		Destroy: func() {
-			for _, component := range m.Routes {
+			for _, component := range m.active {
 				component.Destroy()
 			}
 		},

@@ -1,96 +1,66 @@
 package UI
 
+import (
+	"fmt"
+	Bus "sprak/bus"
+)
+
+type RoutingTable map[string]Route
+
 type Route struct {
-	Create   func() Component
-	Children map[string]Route
+	Create   func(props *Props) *Component
+	Children RoutingTable
 }
 
 // Private to Create() closure -- its internal model
 type routerModel struct {
-	Path   []string         // active router path
-	Routes map[string]Route // routing structure with factory functions
+	Path   []string     // active router path
+	Routes RoutingTable // routing structure with factory functions
 }
 
 // Public methods
 type Router struct {
+	GetRoute func(path ...string) *Route
 	GetPath  func() *[]string
-	Outlet   Outlet
 	Navigate func(paths ...string)
-}
-
-type Outlet struct {
-	Create func() Component
+	Outlet   *Component // the root outlet
 }
 
 // Router instance -- one per Program
-func CreateRouter(routes map[string]Route) Router {
+func CreateRouter(routes RoutingTable, initialPath ...string) Router {
 	router := routerModel{
 		Path:   make([]string, 0),
 		Routes: routes,
 	}
 
+	if len(initialPath) > 0 {
+		router.Path = append(router.Path, initialPath...)
+	}
+
 	return Router{
+		Outlet: CreateOutlet(router.Routes, router.Path...),
+		GetRoute: func(paths ...string) *Route {
+			var find func(routes RoutingTable, paths ...string) *Route
+			find = func(routes RoutingTable, paths ...string) *Route {
+				head := paths[0]
+
+				if len(paths) == 0 {
+					if route, ok := routes[head]; ok {
+						return &route
+					}
+				}
+
+				return find(routes[head].Children, paths[1:]...)
+			}
+
+			return find(router.Routes, paths...)
+		},
 		GetPath: func() *[]string {
 			return &router.Path
 		},
 		Navigate: func(path ...string) {
-			router.Path = path
-		},
-		Outlet: Outlet{
-			Create: func() Component {
-				return CreateOutlet(router)
-			},
+			Bus.Log(fmt.Sprintf("%+v", path))
+			copy(router.Path, path)
 		},
 	}
 }
-
-// Given a router with a root node, return a new root node containing only
-// the nodes listed in the path
-//     __1__
-//    /     \
-//   2      _3_
-//   |     / | \
-//   4    5  6  7
-//
-// path  -> [1,3]
-// route –> [1,[3,[5,6,7]]]
-
-// func construct(router *Router) Route {
-// 	// the complete route path
-// 	var active = Route{
-// 		children: map[string]*Route{},
-// 	}
-
-// 	// track current tail of the route in construction
-// 	var tail *Route = &active
-
-// 	var find func(route map[string]*Route, path []string)
-// 	find = func(route map[string]*Route, path []string) {
-// 		head := path[0]
-
-// 		// lookup to see if head exists in current set of children
-// 		if r, ok := route[head]; ok {
-// 			// last element in path -- end of tree
-// 			if head == path[len(path)-1] {
-// 				// end of the tree
-// 				tail.children[head] = r // the rest of the route
-// 				return
-// 			} else {
-// 				tail.children[head] = r.children[head]
-
-// 				// tail.children[head]
-// 				find(tail.children, path[1:])
-// 			}
-// 		} else {
-// 			panic("Couldn't find node in current router tree!")
-// 		}
-// 	}
-
-// 	root := map[string]*Route{
-// 		"root": router.root,
-// 	}
-
-// 	find(root, append([]string{"root"}, router.state...))
-
-// 	return *active.children["root"]
-// }

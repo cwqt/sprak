@@ -16,7 +16,7 @@ type logModel struct {
 
 var logStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("81"))
 
-func Log() UI.Component {
+func Log(props UI.Props) *UI.Component {
 	m := logModel{
 		logs: make([]string, 0),
 	}
@@ -29,7 +29,7 @@ func Log() UI.Component {
 		}
 	})
 
-	return UI.Component{
+	return &UI.Component{
 		Init: func() tea.Cmd { return nil },
 		Update: func(msg tea.Msg) tea.Cmd {
 			return nil

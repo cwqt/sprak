@@ -1,4 +1,4 @@
-package UI
+package Component
 
 import (
 	"syscall"
@@ -22,6 +22,7 @@ func getWidth() uint {
 	if int(retCode) == -1 {
 		panic(errno)
 	}
+
 	return uint(ws.Col)
 }
 

@@ -5,8 +5,13 @@ import (
 )
 
 type Component struct {
+	Model   interface{}
 	Init    func() tea.Cmd
 	Update  func(msg tea.Msg) tea.Cmd
 	View    func() string
 	Destroy func()
+}
+
+type Props struct {
+	Outlet *Component
 }
