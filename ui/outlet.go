@@ -9,14 +9,13 @@ import (
 
 type outletModel struct {
 	active map[string]*Component
-	path   []string
 }
 
 type Outlet struct {
 	Create func() *Component
 }
 
-func CreateOutlet(routing RoutingTable, paths ...string) *Component {
+func CreateOutlet(routing RoutingTable, paths *[]string, depth int) *Component {
 	m := outletModel{
 		active: map[string]*Component{},
 	}
@@ -30,8 +29,8 @@ func CreateOutlet(routing RoutingTable, paths ...string) *Component {
 		Update: func(msg tea.Msg) tea.Cmd {
 			cmds := make([]tea.Cmd, 0)
 
-			if len(paths) > 0 {
-				head := paths[0]
+			if len(*paths) > 0 {
+				head := (*paths)[depth]
 
 				if route, ok := m.active[head]; ok {
 					if cmd := route.Update(msg); cmd != nil {
@@ -48,7 +47,7 @@ func CreateOutlet(routing RoutingTable, paths ...string) *Component {
 
 					if route, ok := routing[head]; ok {
 						m.active[head] = route.Create(&Props{
-							Outlet: CreateOutlet(route.Children, paths[1:]...),
+							Outlet: CreateOutlet(route.Children, paths, depth+1),
 						})
 
 						if cmd := m.active[head].Init(); cmd != nil {
@@ -63,7 +62,7 @@ func CreateOutlet(routing RoutingTable, paths ...string) *Component {
 		View: func() string {
 			s := ""
 
-			for _, path := range paths {
+			for _, path := range *paths {
 				if component, ok := m.active[path]; ok {
 					s += component.View()
 				}

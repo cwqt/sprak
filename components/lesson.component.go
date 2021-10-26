@@ -56,7 +56,7 @@ func Lesson(props *UI.Props) *UI.Component {
 			return props.Outlet.Update(msg)
 		},
 		View: func() string {
-			s := props.Outlet.View()
+			s := Wrapper.Render(props.Outlet.View()) + "\n"
 			s += "lesson! in state " + strconv.Itoa(int(m.state))
 
 			return s

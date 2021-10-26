@@ -20,7 +20,6 @@ type routerModel struct {
 
 // Public methods
 type Router struct {
-	GetRoute func(path ...string) *Route
 	GetPath  func() *[]string
 	Navigate func(paths ...string)
 	Outlet   *Component // the root outlet
@@ -33,33 +32,22 @@ func CreateRouter(routes RoutingTable, initialPath ...string) Router {
 		Routes: routes,
 	}
 
+	// Set starting route
 	if len(initialPath) > 0 {
 		router.Path = append(router.Path, initialPath...)
 	}
 
 	return Router{
-		Outlet: CreateOutlet(router.Routes, router.Path...),
-		GetRoute: func(paths ...string) *Route {
-			var find func(routes RoutingTable, paths ...string) *Route
-			find = func(routes RoutingTable, paths ...string) *Route {
-				head := paths[0]
-
-				if len(paths) == 0 {
-					if route, ok := routes[head]; ok {
-						return &route
-					}
-				}
-
-				return find(routes[head].Children, paths[1:]...)
-			}
-
-			return find(router.Routes, paths...)
-		},
+		Outlet: CreateOutlet(router.Routes, &router.Path, 0),
 		GetPath: func() *[]string {
 			return &router.Path
 		},
 		Navigate: func(path ...string) {
 			Bus.Log(fmt.Sprintf("%+v", path))
+
+			// Copy path into router.Path slice, need to make a
+			// new slice to expand original length to accomodate
+			router.Path = make([]string, len(path))
 			copy(router.Path, path)
 		},
 	}

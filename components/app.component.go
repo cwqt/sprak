@@ -11,8 +11,7 @@ type appModel struct {
 	logger *UI.Component
 }
 
-var style = lipgloss.NewStyle().
-	Width(PROGRAM_WIDTH).
+var Wrapper = lipgloss.NewStyle().
 	BorderStyle(lipgloss.RoundedBorder()).
 	BorderForeground(lipgloss.Color("8")).
 	Align(lipgloss.Center)
@@ -33,7 +32,7 @@ func App(props *UI.Props) *UI.Component {
 		},
 		View: func() string {
 			s := "språk 0.1\n"
-			s += style.Render(props.Outlet.View())
+			s += Wrapper.Render(props.Outlet.View())
 			s += m.logger.View()
 			return s
 		},

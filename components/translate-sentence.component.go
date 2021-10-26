@@ -15,7 +15,7 @@ func TranslateSentenceComponent(props *UI.Props) *UI.Component {
 			return nil
 		},
 		View: func() string {
-			return "translate the sentence"
+			return "translate the sentence!"
 		},
 		Destroy: func() {
 		},

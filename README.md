@@ -22,3 +22,9 @@ Obviously a lot more to be considered like word synonyms / alternative structure
 chmod +x prisma-sync.sh
 ./prisma-sync.sh
 ```
+
+## Debugger
+
+```
+dlv debug --headless --listen=:2345 --log --api-version=2 ; clear
+```
