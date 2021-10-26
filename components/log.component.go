@@ -14,7 +14,8 @@ type logModel struct {
 	logs []string
 }
 
-var logStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("81"))
+var logStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
+var rerenderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("163"))
 
 func Log(props UI.Props) *UI.Component {
 	m := logModel{
@@ -22,8 +23,16 @@ func Log(props UI.Props) *UI.Component {
 	}
 
 	unsubscribe := Bus.Subscribe("log", func(event Bus.Event) {
+		if len(m.logs) > 30 {
+			m.logs = m.logs[1:]
+		}
+
 		if event.Topic == "log" {
+			// muted colours for log lines
 			m.logs = append(m.logs, logStyle.Render(fmt.Sprintf("%s", event.Data)))
+		} else if event.Topic == "re:render" {
+			m.logs = append(m.logs, rerenderStyle.Render("RE-RENDER!"))
+
 		} else {
 			m.logs = append(m.logs, fmt.Sprintf("%+v", event))
 		}
@@ -35,14 +44,14 @@ func Log(props UI.Props) *UI.Component {
 			return nil
 		},
 		View: func() string {
-			s := ""
+			s := "\n"
 
 			if len(m.logs) == 0 {
 				s += "No logs (yet)"
 			} else {
-				// Add all logs onto
-				for _, v := range m.logs {
-					s += fmt.Sprintf("%s\n", v)
+				// Add all logs onto s, reverse order: newest at top
+				for i := len(m.logs) - 1; i >= 0; i-- {
+					s += fmt.Sprintf("%s\n", m.logs[i])
 				}
 			}
 

@@ -42,7 +42,7 @@ func Lesson(props *UI.Props) *UI.Component {
 
 	return &UI.Component{
 		Init: func() tea.Cmd {
-			return nil
+			return props.Outlet.Init()
 		},
 		Update: func(msg tea.Msg) tea.Cmd {
 			switch msg := msg.(type) {
@@ -62,6 +62,7 @@ func Lesson(props *UI.Props) *UI.Component {
 			return s
 		},
 		Destroy: func() {
+			props.Outlet.Destroy()
 		},
 	}
 }

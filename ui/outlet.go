@@ -20,16 +20,23 @@ func CreateOutlet(routing RoutingTable, paths *[]string, depth int) *Component {
 		active: map[string]*Component{},
 	}
 
+	defer func() {
+		// Cause a re-render
+		Bus.Publish("re:render", nil)
+	}()
+
 	return &Component{
 		Model: &m,
 		Init: func() tea.Cmd {
-			Bus.Log(fmt.Sprintf("%+v", m))
-			return nil
+			Bus.Log(fmt.Sprintf("Created Outlet! %+v", m))
+			return func() tea.Msg {
+				return Render{}
+			}
 		},
 		Update: func(msg tea.Msg) tea.Cmd {
 			cmds := make([]tea.Cmd, 0)
 
-			if len(*paths) > 0 {
+			if 0 < len(*paths) && depth < len(*paths) {
 				head := (*paths)[depth]
 
 				if route, ok := m.active[head]; ok {

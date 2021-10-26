@@ -1,4 +1,5 @@
 db
 dev.db
 migrations
+__debug_bin
 *.apkg

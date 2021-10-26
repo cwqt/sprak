@@ -33,7 +33,7 @@ func Menu(props *UI.Props) *UI.Component {
 		items := [2]menuItem{{
 			label: "Lesson",
 			action: func() {
-				Bus.Publish("router.navigate", []string{"index", "lesson", "translate-sentence"})
+				Bus.Publish("router.navigate", []string{"index", "lesson"})
 			},
 		}, {
 			label: "Import deck",

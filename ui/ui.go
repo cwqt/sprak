@@ -12,6 +12,9 @@ type model struct {
 	outlet *Component
 }
 
+type Render struct {
+}
+
 func Create(router *Router) model {
 	Bus.Publish("log", "Program loaded!")
 	Bus.Subscribe("router.navigate", func(event Bus.Event) {
@@ -28,7 +31,7 @@ func Create(router *Router) model {
 }
 
 func (m model) Init() tea.Cmd {
-	return nil
+	return m.outlet.Init()
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
