@@ -5,6 +5,7 @@ import (
 	"os"
 	Bus "sprak/bus"
 	Component "sprak/components"
+	Data "sprak/data"
 	UI "sprak/ui"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -40,6 +41,8 @@ func main() {
 			},
 		},
 	}, "index", "menu")
+
+	Data.Connect()
 
 	p := tea.NewProgram(UI.Create(&Router), tea.WithAltScreen())
 	Bus.AttachToProgram(p)

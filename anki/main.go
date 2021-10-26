@@ -13,28 +13,23 @@ func ImportApkg(path string) (*anki.Apkg, error) {
 	fmt.Print("Attempting to load .apkg at path: ", path, "... ")
 
 	apkg, err := anki.ReadFile(path)
+	if err != nil {
+		Bus.Err("Failed to read file")
+		Bus.Err(err.Error())
+	}
 
 	defer func() {
 		apkg.Close()
 	}()
 
 	if err != nil {
-		Bus.Log("Failed to load .apkg file")
+		Bus.Err("Failed to load .apkg file")
 		return nil, err
 	}
-
-	// Get a count of total cards so we have a point to get to in the loading bar indicator
-	var totalCardsCount int
-	if err := apkg.Db.QueryRow("select count(*) from notes").Scan(&totalCardsCount); err != nil {
-		Bus.Log("Failed to get total count of Notes")
-		return nil, err
-	}
-
-	Bus.Publish("cards:total", totalCardsCount)
 
 	notes, err := apkg.Notes()
 	if err != nil {
-		Bus.Log("Failed to get notes")
+		Bus.Err("Failed to get notes")
 	}
 
 	var i = 0
@@ -43,6 +38,7 @@ func ImportApkg(path string) (*anki.Apkg, error) {
 
 		note, err := notes.Note()
 		if err != nil {
+			Bus.Err("Failed to get note")
 			fmt.Println("Failed to get note", fmt.Errorf(err.Error()))
 		}
 

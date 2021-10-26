@@ -3,6 +3,7 @@ package Data
 import (
 	"context"
 	"fmt"
+	Bus "sprak/bus"
 	"sprak/db"
 
 	"github.com/flimzy/anki"
@@ -45,6 +46,7 @@ func UpsertCard(note *anki.Note) (*db.CardModel, error) {
 		db.Card.Source.Set(note.FieldValues[1]),
 		db.Card.Tags.Set(note.Tags),
 	).Exec(ctx); err != nil {
+		Bus.Err("Failed to upsert card!")
 		return nil, err
 	} else {
 		return card, nil

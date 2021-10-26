@@ -11,10 +11,6 @@ type outletModel struct {
 	active map[string]*Component
 }
 
-type Outlet struct {
-	Create func() *Component
-}
-
 func CreateOutlet(routing RoutingTable, paths *[]string, depth int) *Component {
 	m := outletModel{
 		active: map[string]*Component{},
@@ -58,6 +54,7 @@ func CreateOutlet(routing RoutingTable, paths *[]string, depth int) *Component {
 						})
 
 						if cmd := m.active[head].Init(); cmd != nil {
+							Bus.Log(fmt.Sprintf("got commands from %s init()", head))
 							cmds = append(cmds, cmd)
 						}
 					}

@@ -1,6 +1,8 @@
 package Bus
 
 import (
+	"fmt"
+
 	tea "github.com/charmbracelet/bubbletea"
 	hub "github.com/simonfxr/pubsub"
 )
@@ -11,6 +13,11 @@ var program *tea.Program
 type Event struct {
 	Topic string
 	Data  interface{}
+}
+
+type LogEvent struct {
+	Level   string
+	Message string
 }
 
 func AttachToProgram(p *tea.Program) {
@@ -36,7 +43,11 @@ func Publish(topic string, data interface{}) {
 }
 
 func Log(message string) {
-	Publish("log", message)
+	Publish("log", LogEvent{Level: "info", Message: message})
+}
+
+func Err(messages ...string) {
+	Publish("log", LogEvent{Level: "error", Message: fmt.Sprintf("%v", messages)})
 }
 
 func Subscribe(topic string, cb func(event Event)) func() {

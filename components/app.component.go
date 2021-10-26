@@ -22,21 +22,22 @@ func App(props *UI.Props) *UI.Component {
 	}
 
 	return &UI.Component{
-		Init: func() tea.Cmd {
-			return nil
-		},
+		Init: props.Outlet.Init,
 		Update: func(msg tea.Msg) tea.Cmd {
-			m.logger.Update(msg)
+			cmds := make([]tea.Cmd, 0)
 
-			return props.Outlet.Update(msg)
+			if cmd := m.logger.Update(msg); cmd != nil {
+				cmds = append(cmds, cmd)
+			}
+
+			return tea.Batch(append(cmds, props.Outlet.Update(msg))...)
 		},
 		View: func() string {
 			s := "språk 0.1\n"
-			s += Wrapper.Render(props.Outlet.View())
+			s += Wrapper.Width(PROGRAM_WIDTH).Render(props.Outlet.View())
 			s += m.logger.View()
 			return s
 		},
-		Destroy: func() {
-		},
+		Destroy: props.Outlet.Destroy,
 	}
 }

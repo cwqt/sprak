@@ -21,7 +21,6 @@ func Create(router *Router) model {
 		if paths, ok := event.Data.([]string); ok {
 			router.Navigate(paths...)
 		}
-
 	})
 
 	return model{
@@ -41,9 +40,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "backspace":
 			Bus.Publish("router.navigate", []string{"index", "menu"})
-			return m, func() tea.Msg {
-				return 0
-			}
+			return m, nil
 		case "ctrl+c", "q":
 			fmt.Println("Goodbye!")
 			return m, tea.Quit
