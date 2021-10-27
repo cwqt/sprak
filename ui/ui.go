@@ -12,8 +12,7 @@ type model struct {
 	outlet *Component
 }
 
-type Render struct {
-}
+type Render struct{}
 
 func Create(router *Router) model {
 	Bus.Publish("log", "Program loaded!")
@@ -64,5 +63,5 @@ func (m model) View() string {
 		}
 	}
 
-	return s + m.outlet.View()
+	return s + m.outlet.View(PROGRAM_WIDTH)
 }

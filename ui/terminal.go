@@ -1,4 +1,4 @@
-package Component
+package UI
 
 import (
 	"syscall"

@@ -32,7 +32,10 @@ func ImportApkg(path string) (*anki.Apkg, error) {
 		Bus.Err("Failed to get notes")
 	}
 
-	var i = 0
+	i := 0
+	// emit an event every CHUNK_SIZE, prevents bus from being overwhelmed
+	CHUNK_SIZE := 250
+	chunk := make([]int, CHUNK_SIZE)
 	for notes.Next() {
 		i++
 
@@ -42,10 +45,15 @@ func ImportApkg(path string) (*anki.Apkg, error) {
 			fmt.Println("Failed to get note", fmt.Errorf(err.Error()))
 		}
 
-		if card, err := Data.UpsertCard(note); err != nil {
+		card, err := Data.UpsertCard(note)
+		if err != nil {
 			return nil, err
+		}
+
+		if i%CHUNK_SIZE == 0 {
+			Bus.Publish("cards:upserted", chunk)
 		} else {
-			Bus.Publish("card:upserted", card.ID)
+			chunk[i%CHUNK_SIZE] = card.ID
 		}
 	}
 

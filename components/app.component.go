@@ -24,18 +24,17 @@ func App(props *UI.Props) *UI.Component {
 	return &UI.Component{
 		Init: props.Outlet.Init,
 		Update: func(msg tea.Msg) tea.Cmd {
-			cmds := make([]tea.Cmd, 0)
+			cmds := UI.Cmds()
 
-			if cmd := m.logger.Update(msg); cmd != nil {
-				cmds = append(cmds, cmd)
-			}
+			cmds.Append(m.logger.Update(msg))
+			cmds.Append(props.Outlet.Update(msg))
 
-			return tea.Batch(append(cmds, props.Outlet.Update(msg))...)
+			return cmds.AsCmd()
 		},
-		View: func() string {
+		View: func(width int) string {
 			s := "språk 0.1\n"
-			s += Wrapper.Width(PROGRAM_WIDTH).Render(props.Outlet.View())
-			s += m.logger.View()
+			s += Wrapper.Width(width).Render(props.Outlet.View(width - 4))
+			s += m.logger.View(width)
 			return s
 		},
 		Destroy: props.Outlet.Destroy,

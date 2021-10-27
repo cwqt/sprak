@@ -5,6 +5,7 @@ import (
 	"os"
 	Bus "sprak/bus"
 	Component "sprak/components"
+	Lesson "sprak/components/lesson"
 	Data "sprak/data"
 	UI "sprak/ui"
 
@@ -22,16 +23,16 @@ func main() {
 					Create: Component.Menu,
 				},
 				"lesson": {
-					Create: Component.Lesson,
+					Create: Lesson.Lesson,
 					Children: UI.RoutingTable{
 						"translate-sentence": {
-							Create: Component.TranslateSentenceComponent,
+							Create: Lesson.TranslateSentenceComponent,
 						},
 						"listening": {
-							Create: Component.TranslateSentenceComponent,
+							Create: Lesson.TranslateSentenceComponent,
 						},
 						"multiple-choice": {
-							Create: Component.TranslateSentenceComponent,
+							Create: Lesson.TranslateSentenceComponent,
 						},
 					},
 				},

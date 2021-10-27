@@ -14,9 +14,11 @@ type logModel struct {
 	logs []string
 }
 
-var logStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
-var rerenderStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("105"))
-var errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("161"))
+var levelStyleMap = map[string]lipgloss.Style{
+	"info":   lipgloss.NewStyle().Foreground(lipgloss.Color("8")),
+	"render": lipgloss.NewStyle().Foreground(lipgloss.Color("105")),
+	"error":  lipgloss.NewStyle().Foreground(lipgloss.Color("161")),
+}
 
 func Log(props UI.Props) *UI.Component {
 	m := logModel{
@@ -30,15 +32,10 @@ func Log(props UI.Props) *UI.Component {
 
 		if event.Topic == "log" {
 			if event, ok := event.Data.(Bus.LogEvent); ok {
-				switch event.Level {
-				case "info":
-					m.logs = append(m.logs, logStyle.Render(fmt.Sprintf("%s", event.Message)))
-				case "error":
-					m.logs = append(m.logs, errorStyle.Render(fmt.Sprintf("%s", event.Message)))
-				}
+				m.logs = append(m.logs, levelStyleMap[event.Level].Render(event.Message))
 			}
 		} else if event.Topic == "re:render" {
-			m.logs = append(m.logs, rerenderStyle.Render("RE-RENDER!"))
+			m.logs = append(m.logs, levelStyleMap["render"].Render("RE-RENDER!"))
 		} else {
 			m.logs = append(m.logs, fmt.Sprintf("%+v", event))
 		}
@@ -49,7 +46,7 @@ func Log(props UI.Props) *UI.Component {
 		Update: func(msg tea.Msg) tea.Cmd {
 			return nil
 		},
-		View: func() string {
+		View: func(width int) string {
 			s := "\n"
 
 			if len(m.logs) == 0 {

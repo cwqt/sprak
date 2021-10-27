@@ -30,15 +30,13 @@ func CreateOutlet(routing RoutingTable, paths *[]string, depth int) *Component {
 			}
 		},
 		Update: func(msg tea.Msg) tea.Cmd {
-			cmds := make([]tea.Cmd, 0)
+			cmds := Cmds()
 
 			if 0 < len(*paths) && depth < len(*paths) {
 				head := (*paths)[depth]
 
 				if route, ok := m.active[head]; ok {
-					if cmd := route.Update(msg); cmd != nil {
-						cmds = append(cmds, cmd)
-					}
+					cmds.Append(route.Update(msg))
 				} else {
 					for path, route := range m.active {
 						if path != head {
@@ -53,22 +51,19 @@ func CreateOutlet(routing RoutingTable, paths *[]string, depth int) *Component {
 							Outlet: CreateOutlet(route.Children, paths, depth+1),
 						})
 
-						if cmd := m.active[head].Init(); cmd != nil {
-							Bus.Log(fmt.Sprintf("got commands from %s init()", head))
-							cmds = append(cmds, cmd)
-						}
+						cmds.Append(m.active[head].Init())
 					}
 				}
 			}
 
-			return tea.Batch(cmds...)
+			return cmds.AsCmd()
 		},
-		View: func() string {
+		View: func(width int) string {
 			s := ""
 
 			for _, path := range *paths {
 				if component, ok := m.active[path]; ok {
-					s += component.View()
+					s += component.View(width)
 				}
 			}
 

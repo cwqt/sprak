@@ -33,7 +33,7 @@ func Menu(props *UI.Props) *UI.Component {
 		items := [2]menuItem{{
 			label: "Lesson",
 			action: func() {
-				Bus.Publish("router.navigate", []string{"index", "lesson"})
+				Bus.Publish("router.navigate", []string{"index", "lesson", "listening"})
 			},
 		}, {
 			label: "Import deck",
@@ -71,8 +71,8 @@ func Menu(props *UI.Props) *UI.Component {
 			}
 			return nil
 		},
-		View: func() string {
-			s := lipgloss.NewStyle().Width(60).Align(lipgloss.Center).Render(titleText)
+		View: func(width int) string {
+			s := lipgloss.NewStyle().Width(width).Align(lipgloss.Center).Render(titleText)
 			s += "\nspråk, duolingo on the cli\n\n"
 			for i, item := range m.items {
 				cursor := " "
